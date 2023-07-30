@@ -43,7 +43,8 @@ async function getRepos() {
                     Description: repo_data.RepositoryDescription,
                     Author: repo_data.RepositoryAuthor,
                     Website: repo_data.RepositoryWebsite,
-                    Icon: repo_data.RepositoryIcon
+                    Icon: repo_data.RepositoryIcon,
+                    Default: repo_data.Default
                 }
             });
             cache.push(repo_data.RepositoryContents);
