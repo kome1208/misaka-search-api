@@ -10,7 +10,7 @@ await init();
 
 server.get("/misaka/search", async (req, res) => {
     if (req.query.q) {
-        const limit = req.query.limit < 100 ? req.query.limit : 100;
+        const limit = req.query.limit ? req.query.limit : 50;
         try {
             const fuse = new Fuse(packages, {
                 keys: ["Name", "Description", "PackageID"]
