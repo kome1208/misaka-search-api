@@ -61,5 +61,5 @@ async function init() {
             await getRepos();
         }
     });
-    server.listen(3030, () => console.log("READY"));
+    server.listen(process.env["PORT"], () => console.log("READY"));
 }
