@@ -22,7 +22,8 @@ job({
         });
         for (let i = 0; i < repo_links.length; i++) {
             try {
-                const repo_data = await got.get(repo_links[i]).json();
+                const data_text = await got.get(repo_links[i]).text();
+                const repo_data = JSON.parse(data_text.replace(/}(?:\s{1,})?,(?:\s{1,})?]/g, "}]"));
                 repo_data.RepositoryContents.forEach((data) => {
                     data.Repository = {
                         Name: repo_data.RepositoryName,
