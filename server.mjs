@@ -1,25 +1,23 @@
 import e from "express";
 import { job } from "cron";
 import got from "got";
+import { Collection } from "@discordjs/collection";
 
 import TweakSearch from "./routes/misaka/tweaks/search.mjs";
 
+const ignoreRepos = ["https://raw.githubusercontent.com/tyler10290/MisakaRepoBackup/main/repo.json"];
 const app = e();
 const port = process.env["PORT"] || 3030;
 
-let packages;
-let repositories;
+const packages = new Collection();
+const repositories = new Collection();
 job({
     cronTime:"0 0,30 * * * *",
     runOnInit:true,
     start:true,
     onTick:async () => {
         const default_repos = await got.get("https://raw.githubusercontent.com/shimajiron/Misaka_Network/main/Default_Repositories.json").json();
-        const repo_links = default_repos.flatMap(({Repositories}) => Repositories);
-        const cache = new Object({
-            packages: [],
-            repos: [],
-        });
+        const repo_links = default_repos.flatMap(({Repositories}) => Repositories).filter((link) => !ignoreRepos.includes(link));
         for (let i = 0; i < repo_links.length; i++) {
             try {
                 const data_text = await got.get(repo_links[i]).text();
@@ -33,14 +31,12 @@ job({
                         Website: repo_data.RepositoryWebsite,
                         Icon: repo_data.RepositoryIcon,
                         Default: repo_data.Default
-                    }
+                    };
+                    packages.set(data.PackageID, data);
                 });
-                cache.repos.push(repo_data);
-                cache.packages.push(repo_data.RepositoryContents);
+                repositories.set(repo_links[i], repo_data);
             } catch (e) {}
         }
-        packages = cache.packages.flat();
-        repositories = cache.repos;
     }
 });
 

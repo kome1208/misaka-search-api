@@ -8,7 +8,7 @@ router.get("/misaka/tweaks/search", async (req, res) => {
     if (req.query.q) {
         const limit = req.query.limit ? req.query.limit : 50;
         try {
-            const fuse = new Fuse(packages, {
+            const fuse = new Fuse(packages.map((pkg) => pkg), {
                 keys: ["Name", "Description", "PackageID"]
             });
             const results = fuse.search(req.query.q, {limit:limit});
