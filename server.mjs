@@ -12,10 +12,11 @@ const port = process.env["PORT"] || 3030;
 const packages = new Collection();
 const repositories = new Collection();
 job({
-    cronTime:"0 0,30 * * * *",
+    cronTime:"*/5 * * * *",
     runOnInit:true,
     start:true,
     onTick:async () => {
+        console.log("refresh")
         const default_repos = await got.get("https://raw.githubusercontent.com/shimajiron/Misaka_Network/main/Default_Repositories.json").json();
         const repo_links = default_repos.flatMap(({Repositories}) => Repositories).filter((link) => !ignoreRepos.includes(link));
         for (let i = 0; i < repo_links.length; i++) {
