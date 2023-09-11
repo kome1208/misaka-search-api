@@ -2,6 +2,7 @@ import e from "express";
 import { job } from "cron";
 import got from "got";
 import { Collection } from "@discordjs/collection";
+import JSON5 from "json5"
 
 import TweakSearch from "./routes/misaka/tweaks/search.mjs";
 
@@ -22,7 +23,7 @@ job({
         for (let i = 0; i < repo_links.length; i++) {
             try {
                 const data_text = await got.get(repo_links[i]).text();
-                const repo_data = JSON.parse(data_text.replace(/}(?:\s{1,})?,(?:\s{1,})?]/g, "}]"));
+                const repo_data = JSON5.parse(data_text);
                 repo_data.RepositoryContents.forEach((data) => {
                     data.Repository = {
                         Name: repo_data.RepositoryName,
@@ -36,7 +37,9 @@ job({
                     packages.set(data.PackageID, data);
                 });
                 repositories.set(repo_links[i], repo_data);
-            } catch (e) {}
+            } catch (e) {
+                console.error(e);
+            }
         }
     }
 });
