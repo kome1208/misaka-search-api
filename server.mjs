@@ -5,6 +5,7 @@ import { Collection } from "@discordjs/collection";
 import JSON5 from "json5"
 
 import TweakSearch from "./routes/misaka/tweaks/search.mjs";
+import TweakLookup from "./routes/misaka/tweaks/lookup.mjs";
 
 const ignoreRepos = ["https://raw.githubusercontent.com/tyler10290/MisakaRepoBackup/main/repo.json"];
 const app = e();
@@ -45,6 +46,7 @@ job({
 });
 
 app.use(TweakSearch);
+app.use(TweakLookup)
 app.listen(port, () => console.log(`LISTENING ON ${port}`));
 
 export { app, packages, repositories };
