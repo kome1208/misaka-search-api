@@ -1,17 +1,13 @@
 {
   "name": "misaka-search-api",
   "version": "1.0.0",
-  "main": "server.mjs",
-  "license": "MIT",
-  "scripts": {
-    "start": "node server.mjs"
-  },
+  "main": "server.js",
+  "license": "ISC",
   "dependencies": {
-    "@discordjs/collection": "^1.5.1",
-    "cron": "^2.4.0",
+    "axios": "^1.5.0",
+    "cron": "^2.4.3",
     "express": "^4.18.2",
-    "fuse.js": "^6.6.2",
-    "got": "^13.0.0",
+    "fuzzy-search": "^3.2.1",
     "json5": "^2.2.3"
   }
 }
