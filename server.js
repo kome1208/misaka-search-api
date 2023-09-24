@@ -61,14 +61,16 @@ app.get("/api/v1/tweaks/search", async (req, res) => {
 
 app.get("/api/v1/tweaks/:packageId", async (req, res) => {
     const { packageId } = req.params;
-    const tweak = tweaks.find((tweak) => tweak.PackageID === packageId);
-    if (!tweak) return res.status(404).json({
+    const packageIds = packageId.split(",");
+    const foundTweaks = tweaks.filter((tweak) => packageIds.includes(tweak.PackageID));
+    if (!foundTweaks.length) return res.status(404).json({
         status: "404 Not Found",
         message: "Tweak not found"
     });
     res.status(200).json({
         status: "200 OK",
-        tweak
+        count: foundTweaks.length,
+        tweaks: foundTweaks
     });
 });
 
