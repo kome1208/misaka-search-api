@@ -5,26 +5,40 @@ const FuzzySearch = require("fuzzy-search");
 const JSON5 = require("json5");
 const app = express();
 const PORT = process.env["PORT"] || 3000;
+const fs = require("fs");
+const repositories = fs.readdirSync("./repositories")
+.map((file) => JSON5.parse(fs.readFileSync(`./repositories/${file}`, "utf8")));
+
 let tweaks = [];
-const ignoreRepos = ["https://raw.githubusercontent.com/tyler10290/MisakaRepoBackup/main/repo.json", "https://raw.githubusercontent.com/p0s3id0n86/misakarepo/main/Repo/repo.json"];
+let repos = [];
 
 job({
     cronTime: "*/5 * * * *",
     runOnInit: true,
     start: true,
     onTick: async () => {
-        let cache = [];
-        const default_repos = await axios.get("https://raw.githubusercontent.com/shimajiron/Misaka_Network/main/Server/DefaultRepositories.json");
-        const requests = default_repos.data
-        .flatMap(({ Repositories }) => (Repositories))
-        .filter((url) => !ignoreRepos.includes(url))
-        .map((url) => axios.get(url));
+        let packagecache = [];
+        let repositorycache = [];
+        const requests = 
+        repositories.map((repo) => axios.get(repo.URL));
         for (const request of requests) {
             try {
                 const res = await request;
                 const data = typeof res.data !== "object" ? JSON5.parse(res.data) : res.data;
                 if (data.RepositoryName) {
                     for (const tweak_data of data.RepositoryContents) {
+
+                        const repository = {
+                            name: data.RepositoryName,
+                            link: res.config.url,
+                            description: data.RepositoryDescription,
+                            author: data.RepositoryAuthor,
+                            website: data.RepositoryWebsite,
+                            icon: data.RepositoryIcon,
+                            default: data.Default,
+                            type: "misaka"
+                        }
+
                         const tweak = {
                             name: tweak_data.Name,
                             description: tweak_data.Description,
@@ -42,28 +56,36 @@ job({
                                 compatible: {
                                     min: tweak_data?.AdditionalSupportedIOS?.MinIOSVersion_CustomLabel || tweak_data.MinIOSVersion,
                                     max: tweak_data?.AdditionalSupportedIOS?.MaxIOSVersion_CustomLabel || tweak_data.MaxIOSVersion,
-                                    builds: tweak_data?.AdditionalSupportedIOS?.Build
+                                    builds: tweak_data?.AdditionalSupportedIOS?.Build,
+                                    exploit: tweak_data?.compatibleExploit,
+                                    os: tweak_data?.CompatibleOS
                                 }
                             },
                             packageid: tweak_data.PackageID,
-                            repository: {
-                                name: data.RepositoryName,
-                                link: res.config.url,
-                                description: data.RepositoryDescription,
-                                author: data.RepositoryAuthor,
-                                website: data.RepositoryWebsite,
-                                icon: data.RepositoryIcon,
-                                default: data.Default,
-                                type: "misaka"
-                            }
+                            repository
                         }
-                        cache.push(tweak);
+
+                        packagecache.push(tweak);
+                        repositorycache.push(repository);
+
                     }
                 } else {
                     for (const tweak_data of data.packages) {
                         const repoUrl = res.config.url;
                         const splitUrl = repoUrl.split("/");
                         splitUrl.pop();
+
+                        const repository = {
+                            name: data.name,
+                            link: res.config.url,
+                            description: data.description,
+                            author: null,
+                            website: null,
+                            icon: [...splitUrl, data.icon].join("/"),
+                            default: null,
+                            type: "Picasso/PureKFD"
+                        }
+
                         const tweak = {
                             name: tweak_data.name,
                             description: tweak_data.description,
@@ -81,30 +103,23 @@ job({
                                 compatible: {
                                     min: null,
                                     max: null,
-                                    builds: null
+                                    builds: null,
+                                    exploit: null
                                 }
                             },
                             packageid: tweak_data.bundleid,
-                            repository: {
-                                name: data.name,
-                                link: res.config.url,
-                                description: data.description,
-                                author: null,
-                                website: null,
-                                icon: [...splitUrl, data.icon].join("/"),
-                                default: null,
-                                type: "Picasso/PureKFD"
-                            }
+                            repository
                         }
-                        cache.push(tweak);
+                        packagecache.push(tweak);
+                        repositorycache.push(repository);
                     }
                 }
             } catch (err) {
                 console.error(err);
             }
         }
-        tweaks = cache;
-        console.log("finished");
+        tweaks = packagecache;
+        repos = repositorycache;
     }
 });
 
@@ -136,6 +151,23 @@ app.get("/api/v2/tweaks/:packageId", async (req, res) => {
         status: "200 OK",
         count: foundTweaks.length,
         tweaks: foundTweaks
+    });
+});
+
+app.get("/api/v2/repos", async (req, res) => {
+    res.status(200).json({
+        status: "200 OK",
+        repos
+    });
+});
+
+app.get("/api/v2/repos/:slug", async (req, res) => {
+    const { slug } = req.params;
+    const foundRepo = 
+    repos.find((repo) => repo.link === repositories.find((r) => r.Slug === slug).URL);
+    res.status(200).json({
+        status: "200 OK",
+        tweaks: foundRepo
     });
 });
 
