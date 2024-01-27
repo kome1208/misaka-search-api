@@ -164,7 +164,7 @@ app.get("/api/v2/repos", async (req, res) => {
 app.get("/api/v2/repos/:slug", async (req, res) => {
     const { slug } = req.params;
     const foundRepo = 
-    repos.find((repo) => repo.link === repositories.find((r) => r.Slug === slug).URL);
+    repos.find((repo) => repo.link === repositories.find((r) => r.Slug === slug)?.URL);
     res.status(200).json({
         status: "200 OK",
         tweaks: foundRepo
