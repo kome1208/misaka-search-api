@@ -26,19 +26,18 @@ job({
                 const res = await request;
                 const data = typeof res.data !== "object" ? JSON5.parse(res.data) : res.data;
                 if (data.RepositoryName) {
+                    const repository = {
+                        name: data.RepositoryName,
+                        link: res.config.url,
+                        description: data.RepositoryDescription,
+                        author: data.RepositoryAuthor,
+                        website: data.RepositoryWebsite,
+                        icon: data.RepositoryIcon,
+                        default: data.Default,
+                        type: "misaka"
+                    }
+                    repositorycache.push(repository);
                     for (const tweak_data of data.RepositoryContents) {
-
-                        const repository = {
-                            name: data.RepositoryName,
-                            link: res.config.url,
-                            description: data.RepositoryDescription,
-                            author: data.RepositoryAuthor,
-                            website: data.RepositoryWebsite,
-                            icon: data.RepositoryIcon,
-                            default: data.Default,
-                            type: "misaka"
-                        }
-
                         const tweak = {
                             name: tweak_data.Name,
                             description: tweak_data.Description,
@@ -66,26 +65,23 @@ job({
                         }
 
                         packagecache.push(tweak);
-                        repositorycache.push(repository);
-
                     }
                 } else {
+                    const repository = {
+                        name: data.name,
+                        link: res.config.url,
+                        description: data.description,
+                        author: null,
+                        website: null,
+                        icon: [...splitUrl, data.icon].join("/"),
+                        default: null,
+                        type: "Picasso/PureKFD"
+                    }
+                    repositorycache.push(repository);
                     for (const tweak_data of data.packages) {
                         const repoUrl = res.config.url;
                         const splitUrl = repoUrl.split("/");
                         splitUrl.pop();
-
-                        const repository = {
-                            name: data.name,
-                            link: res.config.url,
-                            description: data.description,
-                            author: null,
-                            website: null,
-                            icon: [...splitUrl, data.icon].join("/"),
-                            default: null,
-                            type: "Picasso/PureKFD"
-                        }
-
                         const tweak = {
                             name: tweak_data.name,
                             description: tweak_data.description,
@@ -111,7 +107,6 @@ job({
                             repository
                         }
                         packagecache.push(tweak);
-                        repositorycache.push(repository);
                     }
                 }
             } catch (err) {
@@ -167,7 +162,7 @@ app.get("/api/v2/repos/:slug", async (req, res) => {
     repos.find((repo) => repo.link === repositories.find((r) => r.Slug === slug)?.URL);
     res.status(200).json({
         status: "200 OK",
-        tweaks: foundRepo
+        repo: foundRepo
     });
 });
 
