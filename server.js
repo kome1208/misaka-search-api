@@ -144,10 +144,19 @@ app.get("/api/v2/tweaks/:packageId", async (req, res) => {
         status: "404 Not Found",
         message: "Tweak not found"
     });
+    const sortedList = foundTweaks.sort((a, b) => {
+        const indexA = packageIds.indexOf(a.packageid);
+        const indexB = packageIds.indexOf(b.packageid);
+
+        if (indexA === -1) return 1;
+        if (indexB === -1) return -1;
+
+        return indexA - indexB;
+    });
     res.status(200).json({
         status: "200 OK",
         count: foundTweaks.length,
-        tweaks: foundTweaks
+        tweaks: sortedList
     });
 });
 
