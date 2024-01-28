@@ -21,9 +21,9 @@ job({
         let repositorycache = [];
         const requests = 
         repositories.map((repo) => axios.get(repo.URL));
-        for (const request of requests) {
+        for (const request in requests) {
             try {
-                const res = await request;
+                const res = await requests[request];
                 const data = typeof res.data !== "object" ? JSON5.parse(res.data) : res.data;
                 if (data.RepositoryName) {
                     const repository = {
@@ -34,6 +34,7 @@ job({
                         website: data.RepositoryWebsite,
                         icon: data.RepositoryIcon,
                         default: data.Default,
+                        slug: repositories[request].Slug,
                         type: "misaka"
                     }
                     repositorycache.push(repository);
@@ -67,6 +68,9 @@ job({
                         packagecache.push(tweak);
                     }
                 } else {
+                    const repoUrl = res.config.url;
+                    const splitUrl = repoUrl.split("/");
+                    splitUrl.pop();
                     const repository = {
                         name: data.name,
                         link: res.config.url,
@@ -75,13 +79,11 @@ job({
                         website: null,
                         icon: [...splitUrl, data.icon].join("/"),
                         default: null,
+                        slug: repositories[request].Slug,
                         type: "Picasso/PureKFD"
                     }
                     repositorycache.push(repository);
                     for (const tweak_data of data.packages) {
-                        const repoUrl = res.config.url;
-                        const splitUrl = repoUrl.split("/");
-                        splitUrl.pop();
                         const tweak = {
                             name: tweak_data.name,
                             description: tweak_data.description,
