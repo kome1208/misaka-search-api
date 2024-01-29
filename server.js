@@ -4,7 +4,7 @@ const { job } = require("cron");
 const FuzzySearch = require("fuzzy-search");
 const JSON5 = require("json5");
 const app = express();
-const PORT = process.env["PORT"] || 3000;
+const PORT = process.env["PORT"] || 3001;
 const fs = require("fs");
 const repositories = fs.readdirSync("./repositories")
 .map((file) => JSON5.parse(fs.readFileSync(`./repositories/${file}`, "utf8")));
@@ -35,6 +35,7 @@ job({
                         icon: data.RepositoryIcon,
                         default: data.Default,
                         slug: repositories[request].Slug,
+                        tweakCount: data.RepositoryContents.length,
                         type: "misaka"
                     }
                     repositorycache.push(repository);
@@ -80,6 +81,7 @@ job({
                         icon: [...splitUrl, data.icon].join("/"),
                         default: null,
                         slug: repositories[request].Slug,
+                        tweakCount: data.packages.length,
                         type: "Picasso/PureKFD"
                     }
                     repositorycache.push(repository);
