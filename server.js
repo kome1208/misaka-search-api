@@ -165,17 +165,23 @@ app.get("/api/v2/tweaks/:packageId", async (req, res) => {
 app.get("/api/v2/repos", async (req, res) => {
     res.status(200).json({
         status: "200 OK",
-        repos
+        repos: repos
     });
 });
 
 app.get("/api/v2/repos/:slug", async (req, res) => {
     const { slug } = req.params;
-    const foundRepo = 
-    repos.find((repo) => repo.link === repositories.find((r) => r.Slug === slug)?.URL);
+    const { withTweaks } = req.query;
+    const foundRepo = repos.find((repo) => repo.slug === slug);
+    if (!foundRepo) return res.status(404).json({
+        status: "404 Not Found",
+        message: "Repo not found"
+    });
+    const foundTweaks = tweaks.filter((tweak) => tweak.repository.slug === slug);
     res.status(200).json({
         status: "200 OK",
-        repo: foundRepo
+        repo: foundRepo,
+        tweaks: withTweaks === "true" ? foundTweaks : null
     });
 });
 
