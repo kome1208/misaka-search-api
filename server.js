@@ -5,9 +5,11 @@ const FuzzySearch = require("fuzzy-search");
 const JSON5 = require("json5");
 const app = express();
 const PORT = process.env["PORT"] || 3001;
+const cors = require("cors");
 const fs = require("fs");
 const repositories = fs.readdirSync("./repositories")
 .map((file) => JSON5.parse(fs.readFileSync(`./repositories/${file}`, "utf8")));
+app.use(cors());
 
 let tweaks = [];
 let repos = [];
