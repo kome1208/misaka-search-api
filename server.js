@@ -124,7 +124,7 @@ job({
     }
 });
 
-app.get("/api/v2/tweaks/search", async (req, res) => {
+app.get("/v2/tweaks/search", async (req, res) => {
     const { q, limit } = req.query;
     const _limit = Number.isNaN(limit) ? 50 : limit > 50 ? 50 : limit;
     if (!q || q.length < 2) return res.status(400).json({
@@ -140,7 +140,7 @@ app.get("/api/v2/tweaks/search", async (req, res) => {
     });
 });
 
-app.get("/api/v2/tweaks/:packageId", async (req, res) => {
+app.get("/v2/tweaks/:packageId", async (req, res) => {
     const { packageId } = req.params;
     const packageIds = packageId.split(",");
     const foundTweaks = tweaks.filter((tweak) => packageIds.includes(tweak.packageid));
@@ -164,14 +164,14 @@ app.get("/api/v2/tweaks/:packageId", async (req, res) => {
     });
 });
 
-app.get("/api/v2/repos", async (req, res) => {
+app.get("/v2/repos", async (req, res) => {
     res.status(200).json({
         status: "200 OK",
         repos: repos
     });
 });
 
-app.get("/api/v2/repos/:slug", async (req, res) => {
+app.get("/v2/repos/:slug", async (req, res) => {
     const { slug } = req.params;
     const { withTweaks } = req.query;
     const foundRepo = repos.find((repo) => repo.slug === slug);
@@ -188,3 +188,5 @@ app.get("/api/v2/repos/:slug", async (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`LISTENING ON ${PORT}`));
+
+module.exports = app;
